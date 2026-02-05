@@ -1,0 +1,40 @@
+version: '3.8'
+
+# Tier B Full-Stack Test Infrastructure
+# Minimal infrastructure for nightly integration tests
+# Postgres + Redis only (no TURN, no production SFU container)
+
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: voip-postgres-tier-b
+    environment:
+      POSTGRES_USER: voip_test
+      POSTGRES_PASSWORD: voip_test
+      POSTGRES_DB: voip_test
+    ports:
+      - "5433:5432"  # Different port to avoid conflict with dev DB
+    volumes:
+      - ../backend/signaling/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voip_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+    tmpfs:
+      - /var/lib/postgresql/data  # Ephemeral storage for fast tests
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: voip-redis-tier-b
+    ports:
+      - "6380:6379"  # Different port to avoid conflict with dev Redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+    command: redis-server --save ""  # Disable persistence for speed
+
+# No volumes - ephemeral test environment
+# Tests will start/stop services as needed

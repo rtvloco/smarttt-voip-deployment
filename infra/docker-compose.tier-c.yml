@@ -1,0 +1,39 @@
+version: '3.8'
+
+# Tier C E2E Audio Test Infrastructure
+# Postgres + Redis only (SFU and Signaling run as host processes)
+
+services:
+  postgres-tier-c:
+    image: postgres:15
+    container_name: voip-postgres-tier-c
+    environment:
+      POSTGRES_USER: voip_test
+      POSTGRES_PASSWORD: voip_test
+      POSTGRES_DB: voip_test
+    ports:
+      - "5434:5432"  # Different port to avoid conflict with dev/tier-b
+    volumes:
+      - ../backend/signaling/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voip_test -d voip_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+    tmpfs:
+      - /var/lib/postgresql/data  # Ephemeral storage for fast tests
+
+  redis-tier-c:
+    image: redis:7-alpine
+    container_name: voip-redis-tier-c
+    ports:
+      - "6381:6379"  # Different port to avoid conflict with dev/tier-b
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+    command: redis-server --save ""  # Disable persistence for speed
+
+# No volumes - ephemeral test environment
+# SFU and Signaling run as host processes for Tier C
