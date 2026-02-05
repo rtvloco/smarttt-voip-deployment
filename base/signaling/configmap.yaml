@@ -7,7 +7,8 @@ data:
   HOST: "0.0.0.0"
   SIGNALING_API_PORT: "8082"
   VOIP_DB_REQUIRED: "false"
-  POSTGRES_HOST: "postgres-service.voip.svc.cluster.local"
+  # Shared Platform PostgreSQL (CloudNativePG)
+  POSTGRES_HOST: "smarttt-pg-rw.databases.svc.cluster.local"
   POSTGRES_PORT: "5432"
   POSTGRES_DB: "voip"
   TURN_EXTERNAL_IP: "192.168.1.100"  # Override in overlays

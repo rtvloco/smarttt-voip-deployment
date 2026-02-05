@@ -5,7 +5,6 @@ namespace: voip
 
 resources:
 - namespace.yaml
-- postgres/
 - signaling/
 - sfu/
 - coturn/
