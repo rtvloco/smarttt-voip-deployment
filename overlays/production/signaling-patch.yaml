@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signaling-service
+spec:
+  replicas: 3  # Production uses 3 replicas for HA
+  template:
+    spec:
+      containers:
+      - name: signaling
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi

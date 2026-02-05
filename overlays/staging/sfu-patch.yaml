@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sfu-service
+spec:
+  replicas: 2  # Staging uses 2 SFU instances
+  template:
+    spec:
+      containers:
+      - name: sfu
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 4Gi

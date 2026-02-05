@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sfu-service
+spec:
+  replicas: 3  # Production uses 3 SFU instances
+  template:
+    spec:
+      containers:
+      - name: sfu
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 4000m
+            memory: 8Gi

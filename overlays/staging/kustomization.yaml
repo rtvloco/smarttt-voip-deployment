@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: voip-staging
+
+bases:
+- ../../base
+
+resources:
+- ingress.yaml
+
+patches:
+- path: signaling-patch.yaml
+- path: sfu-patch.yaml
+
+images:
+- name: ghcr.io/rtvloco/voip-signaling
+  newTag: staging
+- name: ghcr.io/rtvloco/voip-sfu
+  newTag: staging
+
+configMapGenerator:
+- name: signaling-config
+  behavior: merge
+  literals:
+  - TURN_REALM=voip-staging.smarttt.cloud
+  - TURN_EXTERNAL_IP=TBD  # Set to actual external IP
+
+# Note: Create sealed secrets separately:
+# kubectl create secret ... | kubeseal > sealed-secrets.yaml
+# Then add: - sealed-secrets.yaml to resources

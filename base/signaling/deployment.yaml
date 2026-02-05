@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signaling-service
+  labels:
+    app: signaling-service
+    component: voip
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: signaling-service
+  template:
+    metadata:
+      labels:
+        app: signaling-service
+        component: voip
+    spec:
+      containers:
+      - name: signaling
+        image: ghcr.io/rtvloco/voip-signaling:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: websocket
+          containerPort: 8080
+          protocol: TCP
+        - name: api
+          containerPort: 8082
+          protocol: TCP
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: signaling-config
+              key: PORT
+        - name: HOST
+          valueFrom:
+            configMapKeyRef:
+              name: signaling-config
+              key: HOST
+        - name: SIGNALING_API_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: signaling-config
+              key: SIGNALING_API_PORT
+        - name: VOIP_DB_REQUIRED
+          valueFrom:
+            configMapKeyRef:
+              name: signaling-config
+              key: VOIP_DB_REQUIRED
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: signaling-config
+              key: POSTGRES_HOST
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: signaling-config
+              key: POSTGRES_PORT
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: signaling-config
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: POSTGRES_PASSWORD
+        - name: TURN_EXTERNAL_IP
+          valueFrom:
+            configMapKeyRef:
+              name: signaling-config
+              key: TURN_EXTERNAL_IP
+        - name: TURN_REALM
+          valueFrom:
+            configMapKeyRef:
+              name: signaling-config
+              key: TURN_REALM
+        - name: TURN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: turn-credentials
+              key: TURN_SECRET
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+      restartPolicy: Always

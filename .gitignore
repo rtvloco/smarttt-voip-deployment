@@ -1,0 +1,24 @@
+# Secrets (never commit!)
+*secret*.yaml
+*sealed-secret*.yaml.tmp
+*.key
+*.pem
+
+# Kustomize build output
+kustomization.yaml.bak
+*.orig
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+*.log

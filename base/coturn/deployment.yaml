@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coturn
+  labels:
+    app: coturn
+    component: voip-turn
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: coturn
+  template:
+    metadata:
+      labels:
+        app: coturn
+    spec:
+      containers:
+      - name: coturn
+        image: coturn/coturn:latest
+        ports:
+        - name: turn-tcp
+          containerPort: 3478
+          protocol: TCP
+        - name: turn-udp
+          containerPort: 3478
+          protocol: UDP
+        - name: turns-tcp
+          containerPort: 5349
+          protocol: TCP
+        env:
+        - name: TURN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: turn-credentials
+              key: TURN_SECRET
+        volumeMounts:
+        - name: coturn-config
+          mountPath: /etc/coturn
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      volumes:
+      - name: coturn-config
+        configMap:
+          name: coturn-config

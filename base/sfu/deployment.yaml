@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sfu-service
+  labels:
+    app: sfu-service
+    component: voip
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: sfu-service
+  template:
+    metadata:
+      labels:
+        app: sfu-service
+        component: voip
+    spec:
+      containers:
+      - name: sfu
+        image: ghcr.io/rtvloco/voip-sfu:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8081
+          protocol: TCP
+        - name: rtc-tcp
+          containerPort: 5000
+          protocol: TCP
+        env:
+        - name: SFU_PORT
+          value: "8081"
+        - name: RTC_MIN_PORT
+          value: "10000"
+        - name: RTC_MAX_PORT
+          value: "20000"
+        - name: SIGNALING_URL
+          value: "http://signaling-service:8080"
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+      restartPolicy: Always

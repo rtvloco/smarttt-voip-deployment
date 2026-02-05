@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signaling-service
+spec:
+  replicas: 2  # Staging uses 2 replicas for HA
+  template:
+    spec:
+      containers:
+      - name: signaling
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
