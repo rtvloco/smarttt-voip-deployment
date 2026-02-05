@@ -1,23 +1,24 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: coturn-service
-  labels:
-    app: coturn
+  name: coturn
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 10.150.2.50
 spec:
+  type: LoadBalancer
   selector:
     app: coturn
   ports:
-  - name: turn-tcp
-    port: 3478
-    targetPort: turn-tcp
-    protocol: TCP
   - name: turn-udp
     port: 3478
-    targetPort: turn-udp
+    targetPort: 3478
     protocol: UDP
-  - name: turns-tcp
-    port: 5349
-    targetPort: turns-tcp
+  - name: turn-tcp
+    port: 3478
+    targetPort: 3478
     protocol: TCP
-  type: LoadBalancer  # Needs external IP for TURN
+  - name: turn-tls
+    port: 5349
+    targetPort: 5349
+    protocol: TCP
+  sessionAffinity: ClientIP

@@ -11,7 +11,7 @@ data:
   POSTGRES_HOST: "smarttt-pg-rw.databases.svc.cluster.local"
   POSTGRES_PORT: "5432"
   POSTGRES_DB: "voip"
-  TURN_EXTERNAL_IP: "TBD_COTURN_LOADBALANCER_IP"  # Override in overlays
+  TURN_EXTERNAL_IP: "10.150.2.50"  # Override in overlays
   TURN_REALM: "voip.smarttt.cloud"
   # Shared Platform Redis
   REDIS_HOST: "redis-master.redis.svc.cluster.local"
