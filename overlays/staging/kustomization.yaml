@@ -8,6 +8,8 @@ bases:
 
 resources:
 - ingress.yaml
+- sealed-postgres-credentials.yaml
+- sealed-turn-credentials.yaml
 
 patches:
 - path: signaling-patch.yaml
@@ -24,8 +26,4 @@ configMapGenerator:
   behavior: merge
   literals:
   - TURN_REALM=voip-staging.smarttt.cloud
-  - TURN_EXTERNAL_IP=TBD  # Set to actual external IP
-
-# Note: Create sealed secrets separately:
-# kubectl create secret ... | kubeseal > sealed-secrets.yaml
-# Then add: - sealed-secrets.yaml to resources
+  - TURN_EXTERNAL_IP=TBD  # Set to actual external IP after deployment
