@@ -1,0 +1,22 @@
+# Init container that waits for coturn LoadBalancer IP
+# This prevents deploying with TBD value
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wait-for-coturn-script
+data:
+  wait-for-coturn.sh: |
+    #!/bin/bash
+    echo "Waiting for coturn LoadBalancer to get external IP..."
+    for i in {1..60}; do
+      IP=$(kubectl get svc coturn -n voip-staging -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
+      if [ -n "$IP" ] && [ "$IP" != "<pending>" ]; then
+        echo "Coturn external IP: $IP"
+        echo "$IP" > /shared/coturn-ip
+        exit 0
+      fi
+      echo "Attempt $i/60: Still waiting..."
+      sleep 5
+    done
+    echo "ERROR: Coturn LoadBalancer IP not available after 5 minutes"
+    exit 1
