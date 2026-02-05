@@ -12,3 +12,6 @@ data:
   POSTGRES_DB: "voip"
   TURN_EXTERNAL_IP: "192.168.1.100"  # Override in overlays
   TURN_REALM: "voip.smarttt.cloud"
+  # Shared Platform Redis
+  REDIS_HOST: "redis-master.redis.svc.cluster.local"
+  REDIS_PORT: "6379"
