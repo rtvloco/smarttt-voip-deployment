@@ -10,6 +10,7 @@ resources:
 - ingress.yaml
 - sealed-postgres-credentials.yaml
 - sealed-turn-credentials.yaml
+- sealed-ghcr-pull-secret.yaml
 
 patches:
 - path: signaling-patch.yaml

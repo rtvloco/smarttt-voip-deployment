@@ -6,6 +6,8 @@ spec:
   replicas: 2  # Staging uses 2 SFU instances
   template:
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       containers:
       - name: sfu
         resources:
