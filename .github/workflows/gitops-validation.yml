@@ -1,0 +1,87 @@
+name: GitOps Contract Validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-no-argocd-manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fail if Application manifests exist
+        run: |
+          echo "🔍 Checking for forbidden ArgoCD manifests..."
+
+          # Check for Application manifests
+          if grep -r "kind: Application" . --include="*.yaml" --include="*.yml" 2>/dev/null; then
+            echo ""
+            echo "❌ ERROR: Application manifests found in deployment repo"
+            echo ""
+            echo "Deployment repos must contain ONLY Kubernetes manifests."
+            echo "ArgoCD Applications must be defined in smarttt-infra repo."
+            echo ""
+            echo "📖 See smarttt-infra/docs/GITOPS_CONTRACT.md"
+            exit 1
+          fi
+
+          echo "✅ No Application manifests found"
+
+      - name: Fail if ApplicationSet manifests exist
+        run: |
+          if grep -r "kind: ApplicationSet" . --include="*.yaml" --include="*.yml" 2>/dev/null; then
+            echo ""
+            echo "❌ ERROR: ApplicationSet manifests found in deployment repo"
+            echo ""
+            echo "📖 See smarttt-infra/docs/GITOPS_CONTRACT.md"
+            exit 1
+          fi
+
+          echo "✅ No ApplicationSet manifests found"
+
+      - name: Fail if argocd/ directory exists
+        run: |
+          if [ -d "argocd" ]; then
+            echo "❌ ERROR: argocd/ directory exists in deployment repo"
+            echo ""
+            echo "This directory should not exist. All ArgoCD manifests"
+            echo "must be in smarttt-infra/pve2/k8s/argocd/"
+            echo ""
+            echo "Remove with: rm -rf argocd/"
+            exit 1
+          fi
+
+          echo "✅ No argocd/ directory"
+
+      - name: Validate Kustomize structure
+        run: |
+          echo "🔍 Validating Kustomize structure..."
+
+          # Check for kustomization.yaml files
+          if [ ! -f "base/kustomization.yaml" ] && [ ! -f "base/kustomization.yml" ]; then
+            echo "⚠️  WARNING: No base/kustomization.yaml found"
+            echo "This may be intentional if using raw YAML instead of Kustomize"
+          else
+            echo "✅ Found base/kustomization.yaml"
+          fi
+
+          # Check overlays exist
+          if [ -d "overlays" ]; then
+            echo "✅ Found overlays/ directory"
+          fi
+
+      - name: Summary
+        if: success()
+        run: |
+          echo ""
+          echo "✅ GitOps Contract Validation PASSED"
+          echo ""
+          echo "This deployment repo correctly contains:"
+          echo "  - NO ArgoCD Application manifests ✓"
+          echo "  - NO ArgoCD ApplicationSet manifests ✓"
+          echo "  - NO argocd/ directory ✓"
+          echo "  - ONLY Kubernetes manifests ✓"
