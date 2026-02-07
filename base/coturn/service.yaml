@@ -3,9 +3,8 @@ kind: Service
 metadata:
   name: coturn
   annotations:
-    # Use same public IP as Traefik, different ports
-    metallb.universe.tf/loadBalancerIPs: 209.45.65.209
-    metallb.universe.tf/allow-shared-ip: traefik-coturn-shared
+    # MetalLB will auto-assign an IP from the k8s-pool
+    metallb.universe.tf/address-pool: k8s-pool
 spec:
   type: LoadBalancer
   selector:
