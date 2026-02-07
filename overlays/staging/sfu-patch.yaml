@@ -10,6 +10,7 @@ spec:
         - name: ghcr-pull-secret
       containers:
       - name: sfu
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: 500m
